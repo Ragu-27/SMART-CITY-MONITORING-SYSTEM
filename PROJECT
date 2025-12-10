@@ -1,0 +1,302 @@
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+
+// ----------------------------------------------------
+// MAIN CLASS
+// ----------------------------------------------------
+public class SmartCitySystem {
+
+    public static void main(String[] args) {
+        new LoginFrame().setVisible(true);
+    }
+}
+
+// ----------------------------------------------------
+// CENTRAL DATABASE (IN-MEMORY STORAGE)
+// ----------------------------------------------------
+class Database {
+
+    public static ArrayList<String> traffic = new ArrayList<>();
+    public static ArrayList<String> pollution = new ArrayList<>();
+    public static ArrayList<String> safety = new ArrayList<>();
+    public static ArrayList<String> complaints = new ArrayList<>();
+}
+
+// ----------------------------------------------------
+// MESSAGE BOX POPUP
+// ----------------------------------------------------
+class MessageBox extends Dialog {
+
+    public MessageBox(Frame parent, String title, String msg) {
+        super(parent, title, true);
+
+        setLayout(new GridLayout(2, 1));
+        Label lbl = new Label(msg, Label.CENTER);
+        add(lbl);
+
+        Button ok = new Button("OK");
+        add(ok);
+
+        ok.addActionListener(e -> dispose());
+
+        setSize(300, 150);
+        setLocationRelativeTo(parent);
+    }
+}
+
+// ----------------------------------------------------
+// LOGIN SCREEN
+// ----------------------------------------------------
+class LoginFrame extends Frame {
+
+    TextField userField, passField;
+
+    public LoginFrame() {
+
+        setTitle("Smart City - Admin Login");
+        setSize(350, 200);
+        setLayout(new GridLayout(3, 2, 10, 10));
+
+        add(new Label("Username:"));
+        userField = new TextField();
+        add(userField);
+
+        add(new Label("Password:"));
+        passField = new TextField();
+        passField.setEchoChar('*');
+        add(passField);
+
+        Button loginBtn = new Button("Login");
+        add(loginBtn);
+
+        loginBtn.addActionListener(e -> {
+            if (userField.getText().equals("admin") &&
+                passField.getText().equals("123")) {
+
+                dispose();
+                new Dashboard().setVisible(true);
+
+            } else {
+                new MessageBox(this, "Error", "Invalid Login!").setVisible(true);
+            }
+        });
+
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) { System.exit(0); }
+        });
+    }
+}
+
+// ----------------------------------------------------
+// DASHBOARD SCREEN
+// ----------------------------------------------------
+class Dashboard extends Frame {
+
+    public Dashboard() {
+
+        setTitle("Smart City Monitoring - Dashboard");
+        setSize(400, 500);
+        setLayout(new GridLayout(6, 1, 10, 10));
+
+        Button trafficBtn   = new Button("Traffic Monitoring");
+        Button pollutionBtn = new Button("Pollution Monitoring");
+        Button safetyBtn    = new Button("Public Safety Alerts");
+        Button complaintBtn = new Button("Citizen Complaints");
+        Button logoutBtn    = new Button("Logout");
+
+        add(trafficBtn);
+        add(pollutionBtn);
+        add(safetyBtn);
+        add(complaintBtn);
+        add(logoutBtn);
+
+        trafficBtn.addActionListener(e -> new TrafficModule().setVisible(true));
+        pollutionBtn.addActionListener(e -> new PollutionModule().setVisible(true));
+        safetyBtn.addActionListener(e -> new SafetyModule().setVisible(true));
+        complaintBtn.addActionListener(e -> new ComplaintsModule().setVisible(true));
+
+        logoutBtn.addActionListener(e -> {
+            dispose();
+            new LoginFrame().setVisible(true);
+        });
+
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) { System.exit(0); }
+        });
+    }
+}
+
+// ----------------------------------------------------
+// TRAFFIC MODULE
+// ----------------------------------------------------
+class TrafficModule extends Frame {
+
+    TextField areaField, levelField;
+
+    public TrafficModule() {
+
+        setTitle("Traffic Monitoring");
+        setSize(400, 250);
+        setLayout(new GridLayout(4, 2, 10, 10));
+
+        add(new Label("Area Name:"));
+        areaField = new TextField();
+        add(areaField);
+
+        add(new Label("Traffic Level:"));
+        levelField = new TextField();
+        add(levelField);
+
+        Button save = new Button("Save");
+        Button view = new Button("View Data");
+
+        add(save);
+        add(view);
+
+        save.addActionListener(e -> {
+            String entry = "Area: " + areaField.getText() + " | Level: " + levelField.getText();
+            Database.traffic.add(entry);
+            new MessageBox(this, "Saved", "Traffic Data Recorded!").setVisible(true);
+        });
+
+        view.addActionListener(e -> new ViewFrame("Traffic Records", Database.traffic));
+
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) { dispose(); }
+        });
+    }
+}
+
+// ----------------------------------------------------
+// POLLUTION MODULE
+// ----------------------------------------------------
+class PollutionModule extends Frame {
+
+    TextField locField, aqiField;
+
+    public PollutionModule() {
+
+        setTitle("Pollution Monitoring");
+        setSize(400, 250);
+        setLayout(new GridLayout(4, 2, 10, 10));
+
+        add(new Label("Location:"));
+        locField = new TextField();
+        add(locField);
+
+        add(new Label("AQI:"));
+        aqiField = new TextField();
+        add(aqiField);
+
+        Button save = new Button("Save");
+        Button view = new Button("View Data");
+
+        add(save);
+        add(view);
+
+        save.addActionListener(e -> {
+            String entry = "Location: " + locField.getText() + " | AQI: " + aqiField.getText();
+            Database.pollution.add(entry);
+            new MessageBox(this, "Saved", "Pollution Data Added!").setVisible(true);
+        });
+
+        view.addActionListener(e -> new ViewFrame("Pollution Records", Database.pollution));
+
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) { dispose(); }
+        });
+    }
+}
+
+// ----------------------------------------------------
+// PUBLIC SAFETY MODULE
+// ----------------------------------------------------
+class SafetyModule extends Frame {
+
+    TextField alertField;
+
+    public SafetyModule() {
+
+        setTitle("Public Safety Alerts");
+        setSize(400, 200);
+        setLayout(new GridLayout(3, 1, 10, 10));
+
+        alertField = new TextField();
+
+        add(new Label("Enter Safety Alert:"));
+        add(alertField);
+
+        Button save = new Button("Save Alert");
+        add(save);
+
+        save.addActionListener(e -> {
+            Database.safety.add(alertField.getText());
+            new MessageBox(this, "Success", "Safety Alert Saved!").setVisible(true);
+        });
+
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) { dispose(); }
+        });
+    }
+}
+
+// ----------------------------------------------------
+// CITIZEN COMPLAINTS MODULE
+// ----------------------------------------------------
+class ComplaintsModule extends Frame {
+
+    TextField complaintField;
+
+    public ComplaintsModule() {
+
+        setTitle("Citizen Complaints");
+        setSize(400, 200);
+        setLayout(new GridLayout(3, 1, 10, 10));
+
+        complaintField = new TextField();
+
+        add(new Label("Enter Complaint:"));
+        add(complaintField);
+
+        Button submit = new Button("Submit");
+        add(submit);
+
+        submit.addActionListener(e -> {
+            Database.complaints.add(complaintField.getText());
+            new MessageBox(this, "Success", "Complaint Submitted!").setVisible(true);
+        });
+
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) { dispose(); }
+        });
+    }
+}
+
+// ----------------------------------------------------
+// VIEW FRAME (USED BY ALL MODULES)
+// ----------------------------------------------------
+class ViewFrame extends Frame {
+
+    public ViewFrame(String title, ArrayList<String> data) {
+
+        setTitle(title);
+        setSize(500, 400);
+        setLayout(new BorderLayout());
+
+        TextArea area = new TextArea();
+        area.setEditable(false);
+
+        for (String s : data) {
+            area.append(s + "\n");
+        }
+
+        add(area, BorderLayout.CENTER);
+
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) { dispose(); }
+        });
+
+        setVisible(true);
+    }
+}
